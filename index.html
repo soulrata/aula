@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asignación de Aulas</title>
+  <!-- jQuery desde CDN -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    /* Estilos globales */
+    body {
+      background: #f7f7f7;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    /* Contenedor central */
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #232D4F;
+      text-align: center;
+    }
+    /* Tarjetas de configuración de aulas */
+    .aula-card {
+      border: 1px solid #555555;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    .aula-card label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #232D4F;
+    }
+    .aula-card input,
+    .aula-card select {
+      padding: 6px;
+      margin-left: 5px;
+      border: 1px solid #232D4F;
+      border-radius: 3px;
+    }
+    /* Estilos para botones */
+    button {
+      background-color: #3E5A7E;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 1em;
+      margin: 5px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #232D4F;
+    }
+    /* Estilos para la tabla de asientos */
+    table.seats {
+      border-collapse: collapse;
+      margin: 20px auto;
+      width: auto;
+    }
+    table.seats td {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #555555;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 1em;
+    }
+    /* Estado por defecto */
+    td.available {
+      background-color: #3E5A7E;
+      color: #fff;
+    }
+    /* Estado marcado (tildado) */
+    td.marked {
+      background-color: #B4BEBA;
+      color: #232D4F;
+    }
+    /* Celdas vacías */
+    table.seats td:not(.available):not(.marked) {
+      border: none;
+    }
+    /* Ajustes para dispositivos móviles */
+    @media (max-width: 480px) {
+      /* La tabla ocupa el 100% del contenedor */
+      table.seats {
+        width: 100%;
+      }
+      table.seats td {
+        /* En móviles se usan 3 columnas y se reparte el ancho */
+        width: calc(100% / 3);
+        aspect-ratio: 1 / 1; /* Mantiene la celda cuadrada */
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Vista de Configuración -->
+    <div id="configuracion">
+      <h1>Configuración de Aulas</h1>
+      <div id="aulasContainer">
+        <!-- Se agregarán las tarjetas de configuración -->
+      </div>
+      <button id="agregarAula">Agregar Aula</button>
+      <button id="finalizarConfiguracion">Finalizar Configuración</button>
+    </div>
+    
+    <!-- Vista de Asignación de Asientos -->
+    <div id="asignacion" style="display: none;">
+      <h1>Asignación de Asientos</h1>
+      <div id="aulasAsignacion">
+        <!-- Se generan las tablas de asientos -->
+      </div>
+      <button id="volverConfiguracion">Volver a Configuración</button>
+    </div>
+  </div>
+  
+  <script>
+    $(document).ready(function() {
+      let aulaCount = 0;
+      
+      // Función para crear la tarjeta de configuración de un aula, con el nuevo campo Referente.
+      function crearAulaCard(id) {
+        const card = $(`
+          <div class="aula-card" data-id="${id}">
+            <label>
+              Número de Aula: 
+              <input type="text" class="aula-numero" placeholder="Ej: 12">
+            </label>
+            <label>
+              Tipo de Dispositivo: 
+              <select class="aula-dispositivo">
+                <option value="PC">PC</option>
+                <option value="Tablet">Tablet</option>
+              </select>
+            </label>
+            <label>
+              Referente de Aula:
+              <input type="text" class="aula-referente" placeholder="Ej: Leopoldo">
+            </label>
+            <label>
+              Cantidad de Asientos: 
+              <input type="number" class="aula-asientos" min="1" placeholder="Ej: 30">
+            </label>
+            <button type="button" class="removerAula">Quitar Aula</button>
+          </div>
+        `);
+        return card;
+      }
+      
+      // Agregar una nueva tarjeta de aula.
+      $("#agregarAula").click(function() {
+        aulaCount++;
+        $("#aulasContainer").append(crearAulaCard(aulaCount));
+      });
+      
+      // Remover tarjeta de aula.
+      $("#aulasContainer").on("click", ".removerAula", function() {
+        $(this).closest(".aula-card").remove();
+      });
+      
+      // Finalizar la configuración y pasar a la vista de asignación.
+      $("#finalizarConfiguracion").click(function() {
+        let aulas = [];
+        $(".aula-card").each(function() {
+          const numero = $(this).find(".aula-numero").val().trim();
+          const dispositivo = $(this).find(".aula-dispositivo").val().trim();
+          const referente = $(this).find(".aula-referente").val().trim();
+          const asientos = parseInt($(this).find(".aula-asientos").val(), 10);
+          
+          if (numero && dispositivo && referente && asientos && asientos > 0) {
+            aulas.push({
+              numero: numero,
+              dispositivo: dispositivo,
+              referente: referente,
+              asientos: asientos
+            });
+          }
+        });
+        
+        if (aulas.length === 0) {
+          alert("Debe configurar al menos un aula correctamente.");
+          return;
+        }
+        
+        // Ocultar la vista de configuración y mostrar la de asignación.
+        $("#configuracion").hide();
+        $("#asignacion").show();
+        
+        $("#aulasAsignacion").empty();
+        aulas.forEach(function(aula) {
+          const aulaDiv = $(`
+            <div class="aula-asignacion">
+              <h2>Aula ${aula.numero} - Dispositivo: ${aula.dispositivo} - Referente: ${aula.referente}</h2>
+              <div class="asientos-container"></div>
+            </div>
+          `);
+          
+          // Definir el número de columnas según el ancho de pantalla.
+          let columnas = 5;
+          if (window.innerWidth <= 480) {
+            columnas = 3;
+          }
+          const filas = Math.ceil(aula.asientos / columnas);
+          const table = $("<table class='seats'></table>");
+          let seatNumber = 1;
+          for (let i = 0; i < filas; i++) {
+            const row = $("<tr></tr>");
+            for (let j = 0; j < columnas; j++) {
+              if (seatNumber <= aula.asientos) {
+                const cell = $(`<td class="available" data-seat="${seatNumber}">${seatNumber}</td>`);
+                row.append(cell);
+                seatNumber++;
+              } else {
+                row.append("<td></td>");
+              }
+            }
+            table.append(row);
+          }
+          
+          aulaDiv.find(".asientos-container").append(table);
+          $("#aulasAsignacion").append(aulaDiv);
+        });
+      });
+      
+      // Alternar el estado del asiento: de "available" a "marked" y viceversa.
+      $("#aulasAsignacion").on("click", "td", function() {
+        if ($(this).hasClass("marked")) {
+          $(this).removeClass("marked").addClass("available");
+        } else if ($(this).hasClass("available")) {
+          $(this).removeClass("available").addClass("marked");
+        }
+      });
+      
+      // Botón para volver a la vista de configuración.
+      $("#volverConfiguracion").click(function() {
+        $("#asignacion").hide();
+        $("#configuracion").show();
+      });
+      
+      // Advertencia antes de cerrar o recargar la página.
+      window.addEventListener('beforeunload', function(e) {
+        var confirmationMessage = 'Si recargas o cierras la página se perderán los datos. ¿Estás seguro?';
+        (e || window.event).returnValue = confirmationMessage;
+        return confirmationMessage;
+      });
+    });
+  </script>
+</body>
+</html>
