@@ -2,108 +2,236 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Asignación de Aulas</title>
   <!-- jQuery desde CDN -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Iconos Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Estilos globales */
-    body {
-      background: #f7f7f7;
-      font-family: Arial, sans-serif;
+    :root {
+      --primary-color: #232D4F;
+      --secondary-color: #6EA015;
+      --accent-color: #5A7290;
+      --background: #F2F2F2;
+      --text-dark: #555555;
+      --text-light: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    /* Contenedor central */
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    body {
+      background: var(--background);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.6;
+      padding: 1rem;
     }
+
+    .container {
+      max-width: 1000px;
+      margin: 1rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
     h1, h2 {
-      color: #232D4F;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
       text-align: center;
     }
-    /* Tarjetas de configuración de aulas */
-    .aula-card {
-      border: 1px solid #555555;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      background-color: #f9f9f9;
+
+    h1 i, h2 i {
+      margin-right: 0.8rem;
     }
+
+    /* Tarjetas de Aula */
+    .aula-card {
+      background: white;
+      border: 2px solid var(--primary-color);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .aula-card:hover {
+      transform: translateY(-2px);
+    }
+
     .aula-card label {
       display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #232D4F;
+      margin-bottom: 0.8rem;
+      color: var(--text-dark);
+      font-weight: 500;
     }
+
     .aula-card input,
     .aula-card select {
-      padding: 6px;
-      margin-left: 5px;
-      border: 1px solid #232D4F;
-      border-radius: 3px;
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.4rem;
+      border: 2px solid #ddd;
+      border-radius: 0.8rem;
+      font-size: 1rem;
+      transition: border-color 0.3s;
     }
-    /* Estilos para botones */
+
+    .aula-card input:focus,
+    .aula-card select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    /* Botones */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
     button {
-      background-color: #3E5A7E;
-      color: #fff;
+      flex: 1 1 auto;
+      min-width: 200px;
+      padding: 1.2rem 2rem;
       border: none;
-      border-radius: 5px;
-      padding: 10px 15px;
+      border-radius: 0.8rem;
+      font-size: 1.1rem;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 1em;
-      margin: 5px;
-      transition: background-color 0.3s;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
     }
-    button:hover {
-      background-color: #232D4F;
+
+    button i {
+      font-size: 1.2rem;
     }
-    /* Estilos para la tabla de asientos */
+
+    .primary-btn {
+      background: var(--primary-color);
+      color: var(--text-light);
+    }
+
+    .primary-btn:hover {
+      background: #303F9F;
+    }
+
+    .secondary-btn {
+      background: var(--secondary-color);
+      color: var(--text-light);
+    }
+
+    .secondary-btn:hover {
+      background: #388E3C;
+    }
+
+    .danger-btn {
+      background: #F44336;
+      color: var(--text-light);
+    }
+
+    .danger-btn:hover {
+      background: #D32F2F;
+    }
+
+    /* Tabla de Asientos */
+    .seats-container {
+      overflow-x: auto;
+      padding: 1rem 0;
+    }
+
     table.seats {
-      border-collapse: collapse;
-      margin: 20px auto;
-      width: auto;
+      border-collapse: separate;
+      border-spacing: 0.5rem;
+      margin: 0 auto;
     }
+
     table.seats td {
-      width: 40px;
-      height: 40px;
-      border: 1px solid #555555;
+      min-width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 0.8rem;
       text-align: center;
       vertical-align: middle;
       cursor: pointer;
-      transition: background-color 0.2s;
-      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.2s;
     }
-    /* Estado por defecto */
+
     td.available {
-      background-color: #3E5A7E;
-      color: #fff;
+      background: var(--primary-color);
+      color: white;
     }
-    /* Estado marcado (tildado) */
+
     td.marked {
-      background-color: #B4BEBA;
-      color: #232D4F;
+      background: var(--secondary-color);
+      color: white;
+      position: relative;
     }
-    /* Celdas vacías */
-    table.seats td:not(.available):not(.marked) {
-      border: none;
+
+    td.marked::after {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
     }
-    /* Ajustes para dispositivos móviles */
-    @media (max-width: 480px) {
-      /* La tabla ocupa el 100% del contenedor */
-      table.seats {
-        width: 100%;
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
+        margin: 0.5rem;
       }
+
+      .aula-card {
+        padding: 1rem;
+      }
+
+      button {
+        width: 100%;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+
       table.seats td {
-        /* En móviles se usan 3 columnas y se reparte el ancho */
-        width: calc(100% / 3);
-        aspect-ratio: 1 / 1; /* Mantiene la celda cuadrada */
-        font-size: 1.2em;
+        min-width: 3rem;
+        height: 3rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .aula-card input,
+      .aula-card select {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+      }
+
+      table.seats td {
+        min-width: 2.8rem;
+        height: 2.8rem;
       }
     }
   </style>
@@ -112,24 +240,30 @@
   <div class="container">
     <!-- Vista de Configuración -->
     <div id="configuracion">
-      <h1>Configuración de Aulas</h1>
-      <div id="aulasContainer">
-        <!-- Se agregarán las tarjetas de configuración -->
+      <h1><i class="fas fa-school"></i>Configuración de Aulas</h1>
+      <div id="aulasContainer"></div>
+      <div class="button-group">
+        <button class="primary-btn" id="agregarAula">
+          <i class="fas fa-plus-circle"></i>Agregar Aula
+        </button>
+        <button class="secondary-btn" id="finalizarConfiguracion">
+          <i class="fas fa-check-circle"></i>Finalizar Configuración
+        </button>
       </div>
-      <button id="agregarAula">Agregar Aula</button>
-      <button id="finalizarConfiguracion">Finalizar Configuración</button>
     </div>
     
     <!-- Vista de Asignación de Asientos -->
     <div id="asignacion" style="display: none;">
-      <h1>Asignación de Asientos</h1>
-      <div id="aulasAsignacion">
-        <!-- Se generan las tablas de asientos -->
+      <h1><i class="fas fa-chair"></i>Asignación de Asientos</h1>
+      <div id="aulasAsignacion"></div>
+      <div class="button-group">
+        <button class="danger-btn" id="volverConfiguracion">
+          <i class="fas fa-arrow-left"></i>Volver a Configuración
+        </button>
       </div>
-      <button id="volverConfiguracion">Volver a Configuración</button>
     </div>
   </div>
-  
+
   <script>
     $(document).ready(function() {
       let aulaCount = 0;
@@ -157,7 +291,7 @@
               Cantidad de Asientos: 
               <input type="number" class="aula-asientos" min="1" placeholder="Ej: 30">
             </label>
-            <button type="button" class="removerAula">Quitar Aula</button>
+            <button type="button" class="removerAula">Eliminar Aula</button>
           </div>
         `);
         return card;
@@ -249,8 +383,11 @@
       
       // Botón para volver a la vista de configuración.
       $("#volverConfiguracion").click(function() {
-        $("#asignacion").hide();
-        $("#configuracion").show();
+        // Mostrar una alerta de confirmación
+        if (confirm("¿Está seguro de que desea volver a la configuración? Los cambios en la asignación de asientos no se guardarán.")) {
+          $("#asignacion").hide();
+          $("#configuracion").show();
+        }
       });
       
       // Advertencia antes de cerrar o recargar la página.
